@@ -6,6 +6,10 @@
 #include <QtWidgets/QLineEdit>
 #include <QtCore/QVector>
 #include <Json11.hpp>
+#include <fstream>
+#include <boost/filesystem.hpp>
+
+using namespace std;
 
 #pragma once
 class ConnectionWizard :
@@ -28,9 +32,9 @@ private:
 	QLineEdit* password = new QLineEdit();
 	QPushButton* connect = new QPushButton("Connect");
 	QPushButton* save = new QPushButton("Save");
-	QMap<QString, std::array<QString, 2>>* loadedConnections = new QMap<QString, std::array<QString, 2>>();
+	QMap<string, vector<string>>* loadedConnections = new QMap<string, vector<string>>();
 
-	void closeEvent(QCloseEvent* event) override { exit(0); };
+	void closeEvent(QCloseEvent* event) override;
 
 	void updateListFunctions();
 
@@ -41,4 +45,8 @@ private:
 	void updateSaveConnect();
 
 	void saveAllConnections();
+
+	void connectToTarget();
+
+	void loadProfiles(string inputFile, QMap<string, vector<string>>* dest);
 };
