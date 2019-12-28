@@ -28,6 +28,7 @@ ConnectionWizard::ConnectionWizard(QWidget* parent) : QDialog(parent) {
 	this->setModal(true);
 	this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 	this->setWindowTitle("New Connection");
+	this->setMinimumSize(QSize(200, 200));
 
 	saveList->addItem(QString("New Connection..."));
 	saveList->setSelectionMode(QAbstractItemView::SingleSelection);
