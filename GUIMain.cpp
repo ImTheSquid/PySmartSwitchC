@@ -199,12 +199,6 @@ void GUIMain::sendCommand() {
 	string encrypted = encryptData(commandInput->text().toStdString());
 	socket->write(QByteArray(encrypted.c_str(), encrypted.length()));
 	socket->flush();
-	// TODO: Move to receive function
-	if (commandInput->text().toStdString().compare("exit") == 0) {
-		socket->close();
-		printf("Connection closed.\n");
-		startConnection();
-	}
 	commandInput->setText("");
 }
 
@@ -214,6 +208,11 @@ void GUIMain::receiveData() {
 	string recv(byteRecv.constData(), 256);
 	string decrypted = decryptData(recv);
 	appendLog(QString::fromStdString(decrypted), true);
+	if (decrypted.compare("EXIT") == 0) {
+		socket->close();
+		printf("Connection closed.\n");
+		startConnection();
+	}
 }
 
 void GUIMain::updateSendButton() {
