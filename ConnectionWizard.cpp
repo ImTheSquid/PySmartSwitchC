@@ -21,8 +21,7 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
 
-namespace fs = filesystem;
-using namespace std;
+namespace fs = std::filesystem;
 
 ConnectionWizard::ConnectionWizard(QWidget* parent) : QDialog(parent) {
 	this->setModal(true);
@@ -50,6 +49,7 @@ ConnectionWizard::ConnectionWizard(QWidget* parent) : QDialog(parent) {
 	savedLayout->addWidget(saveList);
 	removeItem->setEnabled(false);
 	savedLayout->addWidget(removeItem);
+	
 
 	mainLayout->addWidget(savedBox);
 	// Left connections
@@ -101,7 +101,7 @@ void ConnectionWizard::updateListFunctions() {
 		port->setValue(30000);
 	}
 	else {
-		string current = saveList->currentItem()->text().toStdString();
+		std::string current = saveList->currentItem()->text().toStdString();
 		address->setText(QString::fromStdString(loadedConnections->value(current).at(0)));
 		port->setValue(QString::fromStdString(loadedConnections->value(current).at(1)).toInt());
 	}
@@ -119,7 +119,7 @@ void ConnectionWizard::saveCurrentConnection() {
 
 	if (!ok || title.isEmpty()) return;
 
-	string titleStr = title.toStdString();
+	std::string titleStr = title.toStdString();
 	if (loadedConnections->contains(titleStr)) {
 		int appendDigit = 1;
 		while (loadedConnections->contains(titleStr + " (" + to_string(appendDigit) + ")")) ++appendDigit;
@@ -138,7 +138,7 @@ void ConnectionWizard::saveAllConnections() {
 	QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 	QDir dir = QDir(path);
 	fs::create_directories(dir.path().toStdString());
-	string combinedPath = dir.filePath("profiles.json").toStdString();
+	std::string combinedPath = dir.filePath("profiles.json").toStdString();
 
 	json11::Json json = loadedConnections->toStdMap();
 

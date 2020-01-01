@@ -37,7 +37,6 @@ private:
 	void closeEvent(QCloseEvent* event) override;
 
 	void updateListFunctions();
-
 	void removeSelectedItem();
 
 	void saveCurrentConnection();
