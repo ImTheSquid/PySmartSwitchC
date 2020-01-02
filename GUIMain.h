@@ -35,6 +35,7 @@ private:
 	QTcpSocket* socket = new QTcpSocket();
 	QLabel* hold = new QLabel("POWER_ICON");
 	QTimer* updateTimer = new QTimer(this);
+	bool relayState = false;
 
 	CryptoPP::AutoSeededRandomPool* rng = new CryptoPP::AutoSeededRandomPool();
 	CryptoPP::RSA::PrivateKey* privateKey = nullptr;
@@ -72,5 +73,10 @@ private:
 	void closeEvent(QCloseEvent* event) override;
 
 	QPixmap* loadImage(int name);
+
+	void toggleRelay(QMouseEvent* event);
+
+	// Tracks events
+	bool eventFilter(QObject* obj, QEvent* event) override;
 };
 

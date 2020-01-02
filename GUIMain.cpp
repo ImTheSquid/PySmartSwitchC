@@ -17,10 +17,13 @@
 #include <QtWidgets/QLabel>
 #include "resource.h"
 #include <QtWidgets/QMessageBox>
+#include <iostream>
+#include <sstream>
 
 
 GUIMain::GUIMain() {
 	this->setWindowTitle(QString("PySmartSwitch Client"));
+	this->resize(750, this->height());
 	updateTimer->setInterval(5000);
 
 	// Generate encryption keys
@@ -58,6 +61,8 @@ GUIMain::GUIMain() {
 	QVBoxLayout* toggleImageLayout = new QVBoxLayout();
 	toggleBox->setLayout(toggleImageLayout);
 	hold->setPixmap(*offIcon);
+	hold->setMouseTracking(true);
+	hold->installEventFilter(this);
 	hold->setAlignment(Qt::AlignCenter);
 	toggleImageLayout->addWidget(hold);
 	toggleBox->setFixedSize(QSize(200, 200));
@@ -109,6 +114,7 @@ GUIMain::GUIMain() {
 
 void GUIMain::startConnection() {
 	// Reset everything
+	relayState = false;
 	updateTimer->stop();
 	connectionLog->clear();
 	connectionStatus->clear();
@@ -141,7 +147,7 @@ void GUIMain::startConnection() {
 		QByteArray arr = socket->read(2048);
 
 		CryptoPP::ByteQueue queue2;
-		vector dataVec(arr.begin(), arr.end());
+		vector<char> dataVec(arr.begin(), arr.end());
 		vector<CryptoPP::byte> byteData;
 		for (char& c : dataVec) {
 			byteData.push_back(static_cast<CryptoPP::byte>(c));
@@ -261,12 +267,14 @@ void GUIMain::receiveData() {
 		}
 		else if (cmd.compare("$POWER") == 0 && cmdVec.size() == 2) {
 			hold->setPixmap(cmdVec.at(1).compare("True") == 0 ? *onIcon : *offIcon);
+			relayState = cmdVec.at(1).compare("True") == 0;
 			// Exception to "no log" policy
 			if (cmdVec.at(1).compare("True") == 0) appendLog("Relay status set to ON", true);
 			else appendLog("Relay status set to OFF", true);
 		}
 		else if (cmd.compare("$UPDATE") == 0 && cmdVec.size() == 2) {
 			// May add some more stuff here later
+			relayState = cmdVec.at(1).compare("True") == 0;
 			hold->setPixmap(cmdVec.at(1).compare("True") == 0 ? *onIcon : *offIcon);
 		}
 	}
@@ -331,4 +339,13 @@ QPixmap* GUIMain::loadImage(int name) {
 	pm->loadFromData(static_cast<uchar*>(data), data_size, "bmp");
 	
 	return pm;
+}
+
+bool GUIMain::eventFilter(QObject* obj, QEvent* event) {
+	if (socket->isOpen() && obj == hold && event->type() == QEvent::MouseButtonPress) {
+		if (relayState) sendCommand("$power off", false, false);
+		else sendCommand("$power on", false, false);
+		return true;
+	}
+	return false;
 }
